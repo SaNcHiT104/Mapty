@@ -17,9 +17,16 @@ navigator.geolocation.getCurrentPosition(
   function (position) {
     const { latitude } = position.coords; //position->object(coords in which latitude and longitude is present)
     const { longitude } = position.coords;
-    console.log(
-      `https://www.google.com/maps/@${latitude},${longitude},15z?entry=ttu`
-    );
+    const coords = [latitude, longitude];
+    //map is class id and L is leaflet
+    const map = L.map('map').setView(coords, 13);
+    //fr/hot/
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    L.marker(coords).addTo(map).bindPopup().openPopup();
   },
   function () {
     alert('Could not get your position');
