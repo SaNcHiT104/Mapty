@@ -10,7 +10,47 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+//workout class
+class Workout {
+  date = new Date();
+  id = (new Date() + '').slice(-10); //unique id for stroing the objects
+  workout(coords, distance, duration) {
+    this.coords = coords;
+    this.distance = distance;
+    this.duration = duration;
+  }
+}
 
+class Running extends Workout {
+  // child class of Workout
+  constructor(coords, distance, duration, cadence) {
+    super(coords, distance, duration); // calling cons of workout
+    this.cadence = cadence;
+    this.calcPace();
+  }
+  calcPace() {
+    //min/km
+    this.pace = this.duration / this.distance;
+    return this.pace;
+  }
+}
+class Cycling extends Workout {
+  constructor(coords, distance, duration, elevationgain) {
+    super(coords, distance, duration);
+    this.elevationgain = elevationgain;
+    this.calcSpeed();
+  }
+  calcSpeed() {
+    //km/hr
+    this.speed = this.distance / (this.duration / 60);
+    return this.speed;
+  }
+}
+
+//APPLICATION ARCHITECTURE
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 // getpostion-->loadMap-->click-->showForm-->form Submit-->new Workout (flow)
 //setting up classes
 class App {
@@ -90,4 +130,5 @@ class App {
       .openPopup();
   }
 }
+
 const app = new App();
