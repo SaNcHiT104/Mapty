@@ -173,11 +173,6 @@ class App {
     }
     //clearing the form
     // Add new object to workout array
-    inputCadence.value =
-      inputDistance.value =
-      inputDuration.value =
-      inputElevation.value =
-        '';
     this.#workouts.push(workout);
 
     // Render workout on map as marker
