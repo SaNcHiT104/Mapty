@@ -99,7 +99,6 @@ class App {
     );
   }
   _loadMap(position) {
-    s;
     const { latitude } = position.coords; //position->object(coords in which latitude and longitude is present)
     const { longitude } = position.coords;
     const coords = [latitude, longitude];
@@ -173,6 +172,11 @@ class App {
     }
     //clearing the form
     // Add new object to workout array
+    inputCadence.value =
+      inputDistance.value =
+      inputDuration.value =
+      inputElevation.value =
+        '';
     this.#workouts.push(workout);
 
     // Render workout on map as marker
