@@ -185,7 +185,11 @@ class App {
 
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
-
+    inputCadence.value =
+      inputDistance.value =
+      inputDuration.value =
+      inputElevation.value =
+        '';
     // Add new object to workout array
     this.#workouts.push(workout);
 
