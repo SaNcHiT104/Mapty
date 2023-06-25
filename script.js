@@ -93,7 +93,8 @@ class App {
   #workouts = [];
   constructor() {
     this._getPostion();
-
+    //get local storage
+    this._getLocalStorage();
     //Attack event handlers
     //form submit button is clicked, so marker should be adjusted
     form.addEventListener('submit', this._newWorkout.bind(this));
@@ -127,6 +128,11 @@ class App {
 
     //on just like addEventListener in leaflet
     this.#map.on('click', this._showForm.bind(this)); //.bind this is used because when we use this on event listener this points to here(this.#map) not on objects
+
+    //adding previous marker from local storage
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work); //setting in form back
+    });
   }
   _showForm(mapE) {
     //rendering form
@@ -212,6 +218,7 @@ class App {
     this._hideForm();
 
     // Set local storage to all workouts
+    this._setLocalStorage();
   }
   _renderWorkoutMarker(workout) {
     L.marker(workout.coords)
@@ -302,7 +309,27 @@ class App {
     });
 
     //user interface
-    workout.click();
+    // workout.click();
+  }
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts)); //object as a string
+  }
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts')); //string back to object
+    // console.log(data);
+    //setting data in list this workouts
+    if (!data) return; //local storage is empty
+    this.#workouts = data; //first thing to do;
+    this.#workouts.forEach(work => {
+      this._renderWorkout(work); //setting in form back
+    });
+    //no marker setup because map is not loaded yet
+    //need to be setted once map is built so in load map
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
