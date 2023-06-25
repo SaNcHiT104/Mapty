@@ -6,6 +6,7 @@
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
+  clicks = 0;
   constructor(coords, distance, duration) {
     // this.date = ...
     // this.id = ...
@@ -32,6 +33,9 @@ class Workout {
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
+  }
+  click() {
+    this.clicks++;
   }
 }
 
@@ -85,31 +89,36 @@ const inputElevation = document.querySelector('.form__input--elevation');
 class App {
   #map;
   #mapEvent;
+  #mapZoomLevel = 13;
   #workouts = [];
   constructor() {
     this._getPostion();
+
+    //Attack event handlers
     //form submit button is clicked, so marker should be adjusted
     form.addEventListener('submit', this._newWorkout.bind(this));
-
     //toggling hidden class for runner and cycling
     inputType.addEventListener('change', this._toggleElevationField.bind(this));
+    //move to pop up when form is clicked
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
   //basically checks for location access and pass the access to load Map
   _getPostion() {
     //setting up geoloaction (one function  for successful, 2nd for error)
-    navigator.geolocation.getCurrentPosition(
-      this._loadMap.bind(this),
-      function () {
-        alert('Could not get your position');
-      }
-    );
+    if (navigator.geolocation)
+      navigator.geolocation.getCurrentPosition(
+        this._loadMap.bind(this),
+        function () {
+          alert('Could not get your position');
+        }
+      );
   }
   _loadMap(position) {
     const { latitude } = position.coords; //position->object(coords in which latitude and longitude is present)
     const { longitude } = position.coords;
     const coords = [latitude, longitude];
     //map is class id and L is leaflet
-    this.#map = L.map('map').setView(coords, 13);
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
     //fr/hot/
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
@@ -129,12 +138,15 @@ class App {
   }
 
   _hideForm() {
-    inputCadence.value =
-      inputDistance.value =
+    inputDistance.value =
       inputDuration.value =
+      inputCadence.value =
       inputElevation.value =
         '';
+
+    form.style.display = 'none';
     form.classList.add('hidden');
+    setTimeout(() => (form.style.display = 'grid'), 1000);
   }
 
   _toggleElevationField() {
@@ -189,6 +201,7 @@ class App {
     // Add new object to workout array
 
     this.#workouts.push(workout);
+    // console.log(this.#workouts);
 
     // Render workout on map as marker
     this._renderWorkoutMarker(workout);
@@ -221,50 +234,75 @@ class App {
   _renderWorkout(workout) {
     // common part in cycle and running (distance and duration)
     let html = `
-    <li class="workout workout--${workout.type}" data-id="1234567890">
-      <h2 class="workout__title">${workout.description}</h2>
-      <div class="workout__details">
-        <span class="workout__icon">${
-          workout.type == 'running' ? '🏃‍♂️' : '🚴‍♀️'
-        }</span>
-        <span class="workout__value">${workout.distance}</span>
-        <span class="workout__unit">km</span>
-      </div>
-      <div class="workout__details">
-        <span class="workout__icon">⏱</span>
-        <span class="workout__value">${workout.duration}</span>
-        <span class="workout__unit">min</span>
-      </div>`;
+      <li class="workout workout--${workout.type}" data-id="${workout.id}">
+        <h2 class="workout__title">${workout.description}</h2>
+        <div class="workout__details">
+          <span class="workout__icon">${
+            workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
+          }</span>
+          <span class="workout__value">${workout.distance}</span>
+          <span class="workout__unit">km</span>
+        </div>
+        <div class="workout__details">
+          <span class="workout__icon">⏱</span>
+          <span class="workout__value">${workout.duration}</span>
+          <span class="workout__unit">min</span>
+        </div>
+    `;
 
-    if (workout.type == 'running') {
+    if (workout.type === 'running')
       html += `
-      <div class="workout__details">
-      <span class="workout__icon">⚡️</span>
-      <span class="workout__value">${workout.pace.toFixed(1)}</span>
-      <span class="workout__unit">min/km</span>
-    </div>
-    <div class="workout__details">
-      <span class="workout__icon">🦶🏼</span>
-      <span class="workout__value">${workout.cadence}</span>
-      <span class="workout__unit">spm</span>
-    </div>
-  </li>
-        `;
-    }
-    if (workout.type == 'cycling') {
-      html += `<div class="workout__details">
-      <span class="workout__icon">⚡️</span>
-      <span class="workout__value">${workout.speed.toFixed(1)}</span>
-      <span class="workout__unit">km/h</span>
-    </div>
-    <div class="workout__details">
-      <span class="workout__icon">⛰</span>
-      <span class="workout__value">${workout.elevationGain}</span>
-      <span class="workout__unit">m</span>
-    </div>
-  </li> `;
-    }
+        <div class="workout__details">
+          <span class="workout__icon">⚡️</span>
+          <span class="workout__value">${workout.pace.toFixed(1)}</span>
+          <span class="workout__unit">min/km</span>
+        </div>
+        <div class="workout__details">
+          <span class="workout__icon">🦶🏼</span>
+          <span class="workout__value">${workout.cadence}</span>
+          <span class="workout__unit">spm</span>
+        </div>
+      </li>
+      `;
+
+    if (workout.type === 'cycling')
+      html += `
+        <div class="workout__details">
+          <span class="workout__icon">⚡️</span>
+          <span class="workout__value">${workout.speed.toFixed(1)}</span>
+          <span class="workout__unit">km/h</span>
+        </div>
+        <div class="workout__details">
+          <span class="workout__icon">⛰</span>
+          <span class="workout__value">${workout.elevationGain}</span>
+          <span class="workout__unit">m</span>
+        </div>
+      </li>
+      `;
+
     form.insertAdjacentHTML('afterend', html);
+  }
+  _moveToPopup(e) {
+    //choosing the parent class
+    if (!this.#map) return;
+
+    const workoutEl = e.target.closest('.workout'); //slecting workout class
+
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(
+      work => work.id === workoutEl.dataset.id
+    );
+    //moving the marker on point
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
+
+    //user interface
+    workout.click();
   }
 }
 
