@@ -99,6 +99,7 @@ class App {
     );
   }
   _loadMap(position) {
+    s;
     const { latitude } = position.coords; //position->object(coords in which latitude and longitude is present)
     const { longitude } = position.coords;
     const coords = [latitude, longitude];
@@ -171,11 +172,6 @@ class App {
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
     //clearing the form
-    inputDistance.value =
-      inputCadence.value =
-      inputDuration.value =
-      inputElevation.value =
-        '';
     // Add new object to workout array
     this.#workouts.push(workout);
 
